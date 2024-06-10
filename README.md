@@ -1,3 +1,3 @@
 - Add REACT_APP_BASE_URL variable in  **.env** as as per backend server url
 - Run the app using - **npm start** defualt port 3000
-- Default credentials - aditya / test123
+- Register using **/api/register** endpoint to use the credentials for login
