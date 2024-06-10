@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {jwtDecode} from 'jwt-decode';
-import axios from 'axios';
+import axiosInstance from '../components/middleware/axios-middleware';
 
 const initialState = {
   user: null,
@@ -12,28 +12,28 @@ const initialState = {
 };
 
 // Thunk for login
-export const loginAction = createAsyncThunk('auth/login', async ({ username, password }, thunkAPI) => {
+export const loginAction = createAsyncThunk('api/login', async ({ username, password }, thunkAPI) => {
   try {
-    // const response = await axios.post('/api/login', { username, password });
-    // const { accessToken, refreshToken } = // response.data;
-    const { accessToken, refreshToken } = {accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c', 
-      refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-    } 
+    const response = await axiosInstance.post('/api/login', { username, password });
+    const { accessToken, refreshToken } = response.data;
+    // const { accessToken, refreshToken } = {accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c', 
+    //   refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+    // } 
     const user = jwtDecode(accessToken);
     return { user, accessToken, refreshToken };
   } catch (error) {
-    return thunkAPI.rejectWithValue(error.response.data);
+    return thunkAPI.rejectWithValue(error.response.data.error);
   }
 });
 
-export const refreshToken = createAsyncThunk('auth/refreshToken', async (refreshToken) => {
+export const regenerateToken = createAsyncThunk('api/refresh-token', async (refreshToken, thunkAPI) => {
   try {
-    const response = await axios.post('/api/refresh-token', { refreshToken });
+    const response = await axiosInstance.post('/api/refresh-token', { refreshToken });
     const { accessToken } = response.data;
     const user = jwtDecode(accessToken);
     return { user, accessToken };
   } catch (error) {
-    return error.response.data;
+    return thunkAPI.rejectWithValue(error.response.data.error);
   }
 });
 
@@ -67,11 +67,11 @@ const authReducer = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(refreshToken.fulfilled, (state, action) => {
+      .addCase(regenerateToken.fulfilled, (state, action) => {
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
       })
-      .addCase(refreshToken.rejected, (state, action) => {
+      .addCase(regenerateToken.rejected, (state, action) => {
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
