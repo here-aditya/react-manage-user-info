@@ -16,9 +16,6 @@ export const loginAction = createAsyncThunk('api/login', async ({ username, pass
   try {
     const response = await axiosInstance.post('/api/login', { username, password });
     const { accessToken, refreshToken } = response.data;
-    // const { accessToken, refreshToken } = {accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c', 
-    //   refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-    // } 
     const user = jwtDecode(accessToken);
     return { user, accessToken, refreshToken };
   } catch (error) {
